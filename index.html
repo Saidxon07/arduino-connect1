@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arduino Connect</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f3f3;
+            padding: 20px;
+        }
+        #connectBtn {
+            padding: 12px 20px;
+            background: #0066ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #output {
+            margin-top: 20px;
+            padding: 15px;
+            background: #ffffff;
+            border-radius: 6px;
+            height: 200px;
+            overflow-y: auto;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Arduino Serial Ulanish</h2>
+
+    <button id="connectBtn">Arduino bilan ulanish</button>
+
+    <div id="output"></div>
+
+<script>
+    let port;
+    let reader;
+
+    document.getElementById("connectBtn").onclick = async () => {
+        try {
+            // Port tanlash
+            port = await navigator.serial.requestPort();
+            await port.open({ baudRate: 9600 });
+
+            const decoder = new TextDecoderStream();
+            port.readable.pipeTo(decoder.writable);
+            reader = decoder.readable.getReader();
+
+            document.getElementById("output").innerHTML += "Ulandi...\n";
+
+            // Ma'lumotlarni o'qish
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                if (value) {
+                    document.getElementById("output").innerHTML += value + "\n";
+                }
+            }
+
+        } catch (err) {
+            document.getElementById("output").innerHTML += "Xatolik: " + err + "\n";
+        }
+    };
+</script>
+
+</body>
+</html>
